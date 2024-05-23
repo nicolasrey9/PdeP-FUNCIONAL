@@ -76,7 +76,7 @@ duplicarVel :: Modificador
 duplicarVel = (*2)
 
 reducirAMitadVel :: Modificador
-reducirAMitadVel = (`div`2) 
+reducirAMitadVel = (`div`2)
 --------------------------------------------------------------
 ------------------------ PUNTO 4 -----------------------------
 --------------------------------------------------------------
@@ -87,7 +87,7 @@ simularCarrera :: Carrera -> [Evento] -> TablaDePosiciones
 simularCarrera carrera = armarTabla . llegarAlEstadoFinalDeCarrera carrera
 
 llegarAlEstadoFinalDeCarrera :: Carrera -> [Evento] -> Carrera
-llegarAlEstadoFinalDeCarrera = foldl (flip($))
+llegarAlEstadoFinalDeCarrera = foldl (flip ($))
 
 armarTabla :: Carrera -> TablaDePosiciones
 armarTabla = transformarATabla . ordenarCompetidores
@@ -111,12 +111,21 @@ transformarATabla autosOrdenados = zip [1 .. length autosOrdenados] (map color a
 
 
 correnTodos :: Int -> Evento
-correnTodos tiempo carrera = map (autoCorraDurante tiempo) carrera
+correnTodos tiempo = map (autoCorraDurante tiempo)
 
 -- type PowerUp = Auto -> Carrera -> Carrera
 -- type Evento = Carrera -> Carrera
-usaPowerUp :: PowerUp -> String -> Evento
-usaPowerUp powerUp colorX carrera = 
+-- afectarALosQueCumplen :: (Auto -> Bool) -> (Auto -> Auto) -> Carrera -> Carrera
+-- afectarALosQueCumplen criterio efecto carrera = (map efecto . filter criterio) carrera ++ filter (not.criterio) carrera
+
+-- Desarrollar las siguientes funciones de modo que puedan usarse para generar los eventos que se dan en una carrera:
+-- usaPowerUp que a partir de un power up y del color del auto que gatilló el poder en cuestión, 
+-- encuentre el auto correspondiente dentro del estado actual de la carrera para usarlo y 
+-- produzca los efectos esperados para ese power up.
+usarPowerUp :: PowerUp -> String -> Evento
+usarPowerUp powerUp colorX carrera = powerUp (encontrarAutoColor colorX carrera) carrera
+encontrarAutoColor :: String -> Carrera -> Auto
+encontrarAutoColor colorx = head . filter ((==colorx) . color)
 
 --------------------------------------------------------------
 ------------------------ PUNTO 1 -----------------------------
