@@ -75,7 +75,6 @@ usarJetPack duracion = alterarVelocidad (`div`2) . autoCorraDurante duracion . a
 --------------------------------------------------------------
 type Evento = Carrera -> Carrera
 type TablaDePosiciones = [(Int, String)]
-{-
 
 simularCarrera :: Carrera -> [Evento] -> TablaDePosiciones
 simularCarrera carrera = armarTabla . llegarAlEstadoFinalDeCarrera carrera
@@ -83,10 +82,27 @@ simularCarrera carrera = armarTabla . llegarAlEstadoFinalDeCarrera carrera
 llegarAlEstadoFinalDeCarrera :: Carrera -> [Evento] -> Carrera
 llegarAlEstadoFinalDeCarrera = foldl (flip ($))
 
-armarTabla :: Carrera -> TablaDePosiciones -}
------------------------------------------------------------
+armarTabla :: Carrera -> TablaDePosiciones
+armarTabla carrera = zip (puestosDeCarrera carrera) (coloresAutos carrera)
+puestosDeCarrera :: Carrera -> [Int]
+puestosDeCarrera carrera = map (flip puesto carrera) carrera
+coloresAutos :: Carrera -> [String]
+coloresAutos = map color
 
+armarTabla'  :: Carrera -> TablaDePosiciones
+armarTabla' carrera = map (posicionDeTabla carrera) carrera
+posicionDeTabla :: Carrera -> Auto -> (Int, String)
+posicionDeTabla carrera auto = (puesto auto carrera, color auto)
 
+--freestyle
+zortOn :: (Eq b, Ord b) => [a] -> (a->b) -> [a]
+zortOn lista criterio   = funcionAux (sort . map criterio $ lista) lista criterio
+funcionAux ::(Eq b, Ord b) => [b] -> [a] -> (a->b) -> [a]
+funcionAux  _ [] _  = [] 
+funcionAux  _ [x] _ = [x] 
+funcionAux listaCriterioOrdenada lista criterio = filter ((== head listaCriterioOrdenada) . criterio) lista 
+    ++ zortOn (filter ((/= head listaCriterioOrdenada) . criterio) lista) criterio
+--
 
 correnTodos :: Int -> Evento
 correnTodos tiempo = map (autoCorraDurante tiempo)
@@ -97,11 +113,7 @@ usarPowerUp powerUp colorX carrera = powerUp (encontrarAutoColor colorX carrera)
 encontrarAutoColor :: String -> Carrera -> Auto
 encontrarAutoColor colorx = head . filter ((==colorx) . color)
 
---------------------------------------------------------------
------------------------- PUNTO 5 -----------------------------
---------------------------------------------------------------
-
-
-
-
+ejemplo = simularCarrera [(Auto "rojo" 120 0),(Auto "blanco" 120 0), (Auto "azul" 120 0), (Auto "negro" 120 0)]
+    [correnTodos 30, usarPowerUp (jetPack 3) "azul", usarPowerUp terremoto "blanco", correnTodos 40, 
+    usarPowerUp (miguelitos 20) "blanco", usarPowerUp (jetPack 6) "negro", correnTodos 10]
 
