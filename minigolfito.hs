@@ -139,6 +139,6 @@ padresDe :: [(Jugador, Puntos)] -> [Padre]
 padresDe = map (padre . fst)
 
 ninosPerdedores :: [(Jugador, Puntos)] -> [(Jugador, Puntos)]
-ninosPerdedores puntosPorJugador = filter (/= ninoGanador puntosPorJugador) puntosPorJugador
+ninosPerdedores puntos = filter (/= ninoGanador puntos) puntos
 ninoGanador :: [(Jugador, Puntos)] -> (Jugador, Puntos)
 ninoGanador = maximoSegun snd
