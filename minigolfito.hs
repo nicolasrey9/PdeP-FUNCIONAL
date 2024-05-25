@@ -35,8 +35,7 @@ mayorSegun f a b
   | f a > f b = a
   | otherwise = b
 
--------------------------------------------------------------------
---------------------------- PUNTO 1 -------------------------------
+---------------------------------------------------------------------------------------------- PUNTO 1 -------------------------------
 -------------------------------------------------------------------
 type Palo = Habilidad -> Tiro
 
@@ -108,8 +107,38 @@ precisionPasaA100 unTiro = unTiro{precision = 100}
 palosUtiles :: Jugador -> Obstaculo -> [Palo]
 palosUtiles unJugador unObstaculo = filter (puedeSuperarlo unObstaculo . golpe unJugador) todosLosPalos
 
-obstaculosConsecutivos :: [Obstaculo] -> Tiro -> Int
-obstaculosConsecutivos obstaculos unTiro = length . takeWhile ()
+obstaculosConsecutivosR :: [Obstaculo] -> Tiro -> Int
+obstaculosConsecutivosR [] unTiro = 0
+obstaculosConsecutivosR (obstaculo : obstaculos) unTiro
+  | puedeSuperarlo obstaculo unTiro = 1 + obstaculosConsecutivosR obstaculos (efectoTrasSuperarlo obstaculo unTiro)
+  | otherwise = 0
+
+obstaculosConsecutivosNoR :: [Obstaculo] -> Tiro -> Int
+obstaculosConsecutivosNoR obstaculos unTiro =
+  length . takeWhile (\(obstaculo,tiroMod) -> puedeSuperarlo obstaculo tiroMod) . zip obstaculos
+    . tirosSucesivos unTiro $ obstaculos
+
+tirosSucesivos :: Tiro -> [Obstaculo] -> [Tiro]
+tirosSucesivos unTiro obstaculos = foldl tiroSucesivo [unTiro] obstaculos
+
+tiroSucesivo :: [Tiro] -> Obstaculo -> [Tiro]
+tiroSucesivo unosTiros obstaculo = unosTiros ++ [(efectoTrasSuperarlo obstaculo . last) unosTiros]
+
+paloMasUtil :: Jugador -> [Obstaculo] -> Palo
+paloMasUtil player obstaculos =
+  maximoSegun (obstaculosConsecutivosNoR obstaculos . golpe player) todosLosPalos
 -------------------------------------------------------------------
 --------------------------- PUNTO 5 -------------------------------
 -------------------------------------------------------------------
+type Padre = String
+
+padresPerdedores :: [(Jugador, Puntos)] -> [Padre]
+padresPerdedores = padresDe . ninosPerdedores
+
+padresDe :: [(Jugador, Puntos)] -> [Padre]
+padresDe = map (padre . fst)
+
+ninosPerdedores :: [(Jugador, Puntos)] -> [(Jugador, Puntos)]
+ninosPerdedores puntosPorJugador = filter (/= ninoGanador puntosPorJugador) puntosPorJugador
+ninoGanador :: [(Jugador, Puntos)] -> (Jugador, Puntos)
+ninoGanador = maximoSegun snd
