@@ -35,6 +35,9 @@ mayorSegun f a b
   | f a > f b = a
   | otherwise = b
 
+-------------------------------------------------------------------
+--------------------------- PUNTO 1 -------------------------------
+-------------------------------------------------------------------
 type Palo = Habilidad -> Tiro
 
 putter :: Palo
@@ -46,21 +49,67 @@ madera habilidad = UnTiro 100 (precisionJugador habilidad `div` 2) 5
 hierros :: Int -> Palo
 hierros n habilidad = UnTiro (fuerzaJugador habilidad * n) (precisionJugador habilidad `div` n) (max (n-3) 0)
 
-palos :: [Palo]
-palos = [putter, madera] ++ map hierros [1..10]
+todosLosPalos :: [Palo]
+todosLosPalos = [putter, madera] ++ map hierros [1..10]
 
+-------------------------------------------------------------------
+--------------------------- PUNTO 2 -------------------------------
+-------------------------------------------------------------------
 golpe :: Jugador -> Palo -> Tiro
 golpe unaPersona unPalo = unPalo . habilidad $ unaPersona
 
-type Obstaculo = Tiro -> Tiro
-
-tunelConRampita :: Obstaculo
-tunelConRampita unTiro
-    | altura unTiro == 0 && precision unTiro > 90 = unTiro{velocidad= velocidad unTiro * 2, precision = 100}
-    | otherwise = unTiro{velocidad=0, precision=0, altura=0}
+-------------------------------------------------------------------
+--------------------------- PUNTO 3 -------------------------------
+-------------------------------------------------------------------
+data Obstaculo  = Obstaculo{
+  puedeSuperarlo :: Tiro -> Bool,
+  efectoTrasSuperarlo :: Tiro -> Tiro
+}
+tunel :: Obstaculo
+tunel = Obstaculo puedeSuperarTunel superoTunel
+puedeSuperarTunel :: Tiro -> Bool
+puedeSuperarTunel = superaRestricciones [rasDelSuelo, (>90).precision]
+superoTunel :: Tiro -> Tiro
+superoTunel = precisionPasaA100 . modificarVelocidad (*2)
 
 laguna :: Int -> Obstaculo
-laguna largoLaguna unTiro
-    | velocidad unTiro > 80 && altura unTiro > 1 && altura unTiro < 5 = unTiro{altura = altura unTiro `div` largoLaguna}
-    | otherwise = unTiro{velocidad=0, precision=0, altura=0}
+laguna largoLaguna = Obstaculo puedeSuperarLaguna (superoLaguna largoLaguna)
+puedeSuperarLaguna :: Tiro -> Bool
+puedeSuperarLaguna = superaRestricciones [between 1 5 . altura, (>80). velocidad]
+superoLaguna :: Int -> Tiro -> Tiro
+superoLaguna largoLaguna = modificarAltura (`div` largoLaguna)
 
+hoyo :: Obstaculo
+hoyo = Obstaculo puedeSuperarHoyo superoHoyo
+puedeSuperarHoyo :: Tiro -> Bool
+puedeSuperarHoyo = superaRestricciones [between 5 20 . velocidad, rasDelSuelo, (>95). precision]
+superoHoyo :: Tiro -> Tiro
+superoHoyo _ = tiroNulo
+
+tiroNulo :: Tiro
+tiroNulo = UnTiro 0 0 0
+
+modificarVelocidad :: (Int -> Int) -> Tiro -> Tiro
+modificarVelocidad modificador unTiro = unTiro{velocidad = modificador . velocidad $ unTiro}
+modificarAltura :: (Int -> Int) -> Tiro -> Tiro
+modificarAltura modificador unTiro = unTiro{altura = modificador . altura $ unTiro}
+
+superaRestricciones :: [Tiro -> Bool] -> Tiro ->  Bool
+superaRestricciones restricciones tiro = all ($ tiro) restricciones
+
+rasDelSuelo :: Tiro -> Bool
+rasDelSuelo = (==0) . altura
+
+precisionPasaA100 :: Tiro -> Tiro
+precisionPasaA100 unTiro = unTiro{precision = 100}
+-------------------------------------------------------------------
+--------------------------- PUNTO 4 -------------------------------
+-------------------------------------------------------------------
+palosUtiles :: Jugador -> Obstaculo -> [Palo]
+palosUtiles unJugador unObstaculo = filter (puedeSuperarlo unObstaculo . golpe unJugador) todosLosPalos
+
+obstaculosConsecutivos :: [Obstaculo] -> Tiro -> Int
+obstaculosConsecutivos obstaculos unTiro = length . takeWhile ()
+-------------------------------------------------------------------
+--------------------------- PUNTO 5 -------------------------------
+-------------------------------------------------------------------
