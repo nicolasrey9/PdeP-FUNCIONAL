@@ -13,7 +13,7 @@ irALaPlaya turista
     | otherwise = modificarStressEn (subtract 1) turista
 
 apreciarElementoDelPaisaje :: String -> Excursion
-apreciarElementoDelPaisaje paisaje = modificarStressEn (subtract length paisaje)
+apreciarElementoDelPaisaje paisaje = modificarStressEn (subtract $ length paisaje)
 
 salirAHablarUnIdioma :: Idioma -> Excursion
 salirAHablarUnIdioma idioma = continueAcompanado . aprendaIdioma idioma
@@ -29,7 +29,7 @@ continueAcompanado unTurista = unTurista{estaViajandoSolo = False}
 
 caminarCiertosMinutos :: Int -> Excursion
 caminarCiertosMinutos tiempo =
-    modificarCansancioEn (+ intensidadCaminata tiempo) . modificarStressEn (subtract intensidadCaminata tiempo)
+    modificarCansancioEn (+ intensidadCaminata tiempo) . modificarStressEn (subtract $ intensidadCaminata tiempo)
 intensidadCaminata :: Int -> Int
 intensidadCaminata tiempo = tiempo `div` 4
 
@@ -53,7 +53,7 @@ betoYCathi = (Turista 15 15 True [], Turista 15 15 True ["Catalan"])
 
 hacerExcursion :: Excursion -> Turista -> Turista
 hacerExcursion unaExcursion unTurista =
-    modificarStressEn (subtract ((* div 10 100) . stress) unTurista) . unaExcursion $ unTurista
+    modificarStressEn (subtract $ ((* div 10 100) . stress) unTurista) . unaExcursion $ unTurista
 
 
 deltaSegun :: (a -> Int) -> a -> a -> Int
