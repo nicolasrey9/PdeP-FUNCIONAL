@@ -9,11 +9,11 @@ type Excursion = Turista -> Turista
 
 irALaPlaya :: Excursion
 irALaPlaya turista
-    | estaViajandoSolo turista = modificarCansancioEn (\s -> s - 5) turista
-    | otherwise = modificarStressEn (\s -> s -1) turista
+    | estaViajandoSolo turista = modificarCansancioEn (subtract 5) turista
+    | otherwise = modificarStressEn (subtract 1) turista
 
 apreciarElementoDelPaisaje :: String -> Excursion
-apreciarElementoDelPaisaje paisaje = modificarStressEn (\s -> s - length paisaje)
+apreciarElementoDelPaisaje paisaje = modificarStressEn (subtract length paisaje)
 
 salirAHablarUnIdioma :: Idioma -> Excursion
 salirAHablarUnIdioma idioma = continueAcompanado . aprendaIdioma idioma
@@ -29,7 +29,7 @@ continueAcompanado unTurista = unTurista{estaViajandoSolo = False}
 
 caminarCiertosMinutos :: Int -> Excursion
 caminarCiertosMinutos tiempo =
-    modificarCansancioEn (+ intensidadCaminata tiempo) . modificarStressEn (\s -> s - intensidadCaminata tiempo)
+    modificarCansancioEn (+ intensidadCaminata tiempo) . modificarStressEn (subtract intensidadCaminata tiempo)
 intensidadCaminata :: Int -> Int
 intensidadCaminata tiempo = tiempo `div` 4
 
@@ -53,7 +53,7 @@ betoYCathi = (Turista 15 15 True [], Turista 15 15 True ["Catalan"])
 
 hacerExcursion :: Excursion -> Turista -> Turista
 hacerExcursion unaExcursion unTurista =
-    modificarStressEn (\s -> s - ((* div 10 100) . stress) unTurista) . unaExcursion $ unTurista
+    modificarStressEn (subtract ((* div 10 100) . stress) unTurista) . unaExcursion $ unTurista
 
 
 deltaSegun :: (a -> Int) -> a -> a -> Int
@@ -106,12 +106,25 @@ dejaAcompanado :: Excursion -> Turista -> Bool
 dejaAcompanado excursion  = not . estaViajandoSolo . excursion
 
 efectividadDeUnTour :: Tour -> [Turista] -> Int
-efectividadDeUnTour unTour = 
+efectividadDeUnTour unTour =
     sum . espiritualidadRecibida unTour . filter (flip esConvincentePara unTour)
 
 espiritualidadRecibida :: Tour -> [Turista] -> [Int]
-espiritualidadRecibida unTour turistasConvencidos =
+espiritualidadRecibida unTour = map (sumasDePerdidasDeEstresYCansancio unTour)
 
+sumasDePerdidasDeEstresYCansancio :: Tour -> Turista -> Int
+sumasDePerdidasDeEstresYCansancio unTour unTurista =
+    abs (deltaTourSegun cansancio unTour unTurista - deltaTourSegun stress unTour unTurista)
 
+deltaTourSegun :: Indice -> Tour -> Turista -> Int
+deltaTourSegun indice tour turista = deltaSegun indice (hacerTour tour turista) turista
 
+playasInf :: Tour
+playasInf = repeat irALaPlaya
 
+-- ¿Se puede saber si ese tour es convincente para Ana? ¿Y con Beto? Justificar.
+-- Si, usando fst y snd
+
+-- ¿Existe algún caso donde se pueda conocer la efectividad de este tour? Justificar
+-- No, para devolver un resutado filter debe evaluar toda la lista, entonces una lista
+-- infinita no puede ser filtrada.
