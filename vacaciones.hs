@@ -126,5 +126,6 @@ playasInf = repeat irALaPlaya
 -- Si, usando fst y snd
 
 -- ¿Existe algún caso donde se pueda conocer la efectividad de este tour? Justificar
--- No, para devolver un resutado filter debe evaluar toda la lista, entonces una lista
+-- No, mientras que la lista no sea vacia,
+-- para devolver un resutado filter debe evaluar toda la lista, entonces una lista
 -- infinita no puede ser filtrada.
