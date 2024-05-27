@@ -1,3 +1,4 @@
+import Text.Show.Functions
 ---------------------------PUNTO 1
 data Criatura = Criatura{
     peligrosidad :: Int,
@@ -51,7 +52,6 @@ masDe10DeExperiencia = (>10) . experiencia
 ---- 1)
 zipWithIf :: (a -> b -> b) -> (b -> Bool) -> [a] -> [b] -> [b]
 zipWithIf _ _ _ [] = []
-zipWithIf _ _ [] _ = []
 zipWithIf operacion criterio (x:xs) (y:ys)
     | criterio y = operacion x y : zipWithIf operacion criterio xs ys
     | otherwise = y : zipWithIf operacion criterio (x : xs) ys
@@ -59,8 +59,16 @@ zipWithIf operacion criterio (x:xs) (y:ys)
 --- 2) --a
 abecedario :: [Char]
 abecedario = ['a' .. 'z']
+
+letrasDesde :: Char -> [Char]
+letrasDesde letra = [letra .. 'z']
+
+letrasHasta :: Char -> [Char]
+letrasHasta letra = ['a' .. letra]
+
 abecedarioDesde :: Char -> [Char]
-abecedarioDesde letra = drop (length (takeWhile (/= letra) abecedario)) abecedario ++ takeWhile (/= letra) abecedario
+abecedarioDesde letra = letrasDesde letra ++ init (letrasHasta letra)
+
 
 --b
 desencriptarLetra :: Char -> Char -> Char
@@ -76,22 +84,15 @@ obtenerLetraConDistancia letraADesencriptar distanciaEncriptado =
 
 --c
 cesar :: Char -> String -> String
-cesar letraMargen = zipWithIf desencriptarLetra (`elem` abecedario) (repeat letraMargen)
+cesar = desencriptarLetraALetra repeat
 
 ejemploConsulta2 :: Char -> String
 ejemploConsulta2 letraMargen = cesar letraMargen "jrzel zrfaxal!"
 
 ----- 3)
 vigenere :: String -> String -> String
-vigenere textoClave mensaje = traducirLetraALetra mensaje . extenderTextoA (length mensaje) $ textoClave
+vigenere = desencriptarLetraALetra cycle
 
-extenderTextoA :: Int -> String -> String
-extenderTextoA _ [] = []
-extenderTextoA largo texto
-    | length texto == largo = texto
-    | length texto > largo = extenderTextoA largo (init texto)
-    | length texto < largo = extenderTextoA largo (texto ++ texto)
-
-traducirLetraALetra :: String -> String -> String
-traducirLetraALetra mensajeATraducir clave =
-    zipWithIf desencriptarLetra (\letra -> True) clave mensajeATraducir
+desencriptarLetraALetra :: (a -> String) -> a -> String -> String
+desencriptarLetraALetra funcionExtendedoraDeClave clave = 
+    zipWithIf desencriptarLetra (`elem` abecedario) (funcionExtendedoraDeClave clave)
