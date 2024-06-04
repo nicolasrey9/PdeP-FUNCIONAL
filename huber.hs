@@ -41,8 +41,8 @@ puedeTomarViaje (Chofer _ _ _ condicion) = condicion
 liquidacionDeChofer :: Chofer -> Int
 liquidacionDeChofer = sum . map trdOf3 . viajes
 
-realizarUnViaje :: [Chofer] -> Viaje -> Chofer
-realizarUnViaje choferes unViaje = efectuarElViaje unViaje . quienTieneMenosViajes . quienesToman choferes unViaje
+--realizarUnViaje :: [Chofer] -> Viaje -> Chofer
+--realizarUnViaje choferes unViaje = efectuarElViaje unViaje . quienTieneMenosViajes . quienesToman choferes unViaje
 
 quienesToman :: [Chofer] -> Viaje -> [Chofer]
 quienesToman choferes unViaje = filter (flip puedeTomarViaje unViaje) choferes
@@ -60,7 +60,13 @@ menorViajes = maximum . map cantidadDeViajes
 cantidadDeViajes :: Chofer -> Int
 cantidadDeViajes = length . viajes
 
+quienTieneMenosViajes'' :: [Chofer] -> Chofer
+quienTieneMenosViajes'' = foldl1 funcionRara
 
+funcionRara :: Chofer -> Chofer -> Chofer
+funcionRara chofer1 chofer2
+    | (length . viajes) chofer1 < (length . viajes) chofer2 = chofer1
+    | otherwise                                 = chofer2
 
 
 
