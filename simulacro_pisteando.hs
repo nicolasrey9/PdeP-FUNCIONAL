@@ -4,7 +4,7 @@ data Auto = Auto {
     desgasteRuedas :: Float,
     desgasteChasis :: Float,
     velocidadMax :: Float,
-    tiempoDeCarrera :: Float  
+    tiempoDeCarrera :: Float
 } deriving(Show, Eq)
 
 -------PUNTO 1
@@ -28,22 +28,22 @@ repararAuto = modificarDesgasteDeRuedas (\desgasteActual -> 0) . modificarDesgas
 -----PUNTO 4
 --
 modificarDesgasteDeRuedas :: (Float -> Float) -> Auto -> Auto
-modificarDesgasteDeRuedas modificador unAuto = 
+modificarDesgasteDeRuedas modificador unAuto =
     unAuto{desgasteRuedas = modificador.desgasteRuedas $ unAuto}
 
 modificarDesgasteChasis :: (Float -> Float) -> Auto -> Auto
-modificarDesgasteChasis modificador unAuto = 
+modificarDesgasteChasis modificador unAuto =
     unAuto{desgasteChasis = modificador.desgasteChasis $ unAuto}
 
 modificarTiempoDeCarrera :: (Float -> Float) -> Auto -> Auto
-modificarTiempoDeCarrera modificador unAuto = 
+modificarTiempoDeCarrera modificador unAuto =
     unAuto{tiempoDeCarrera = modificador.tiempoDeCarrera $ unAuto}
 --
 
 type Tramo = Auto -> Auto
 
 curva :: Float -> Float -> Tramo
-curva angulo longitud unAuto = 
+curva angulo longitud unAuto =
     modificarTiempoDeCarrera (+ longitud / ( velocidadMax unAuto / 2 )) . modificarDesgasteDeRuedas (+3*longitud/angulo) $ unAuto
 
 curvaPeligrosa :: Tramo
@@ -52,7 +52,7 @@ curvaTranca :: Tramo
 curvaTranca = curva 110 550
 
 recta :: Float -> Tramo
-recta longitud unAuto =  
+recta longitud unAuto =
     modificarTiempoDeCarrera (+longitud / velocidadMax unAuto) . modificarDesgasteChasis (+ 0.01*longitud) $ unAuto
 
 tramoRectoClassic :: Tramo
@@ -68,7 +68,7 @@ boxes unAuto
 --
 sumarLaMitadDeTiempoAgregadoPorTramo :: Auto -> Auto -> Auto
 sumarLaMitadDeTiempoAgregadoPorTramo autoAntes autoDespues =
-    modificarTiempoDeCarrera(+ (tiempoDeCarrera autoDespues - tiempoDeCarrera autoDespues) *0.5) autoDespues
+    modificarTiempoDeCarrera (+ (tiempoDeCarrera autoDespues - tiempoDeCarrera autoDespues) *0.5) autoDespues
 --
 
 tramoMojado :: Tramo -> Tramo
@@ -78,7 +78,7 @@ tramoConRipio :: Tramo -> Tramo
 tramoConRipio unTramo = unTramo . unTramo
 
 tramoConObstruccion :: Float -> Tramo -> Tramo
-tramoConObstruccion metrosOcupados unTramo = 
+tramoConObstruccion metrosOcupados unTramo =
     modificarDesgasteDeRuedas (+2*metrosOcupados) . unTramo
 
 -----PUNTO 5
@@ -86,12 +86,13 @@ tramoConObstruccion metrosOcupados unTramo =
 pasarPorTramo :: Tramo -> Auto -> Auto
 pasarPorTramo unTramo unAuto
     | not.noDaMas $ unAuto = unTramo unAuto
+    | otherwise = unAuto
 
 -----PUNTO 6
 type Pista = [Tramo]
 
-superPista :: [Tramo]
-superPista = [tramoRectoClassic, curvaTranca, tramoMojado tramito, 
+superPista :: Pista
+superPista = [tramoRectoClassic, curvaTranca, tramoMojado tramito,
     tramito, tramoConObstruccion 2 (curva 80 400), curva 115 650,
     recta 970, curvaPeligrosa, tramoConRipio tramito, recta 800 . boxes]
 
@@ -100,18 +101,13 @@ peganLaVuelta :: Pista -> [Auto] -> [Auto]
 peganLaVuelta unaPista = map (corraMientrasSeLaBanque unaPista)
 
 corraMientrasSeLaBanque :: Pista -> Auto -> Auto
-corraMientrasSeLaBanque pista auto = foldl aplicarSiSeLaBanca auto pista
-
-aplicarSiSeLaBanca :: Auto -> Tramo -> Auto
-aplicarSiSeLaBanca auto tramo
-    | noDaMas auto = auto
-    | otherwise = tramo auto
+corraMientrasSeLaBanque pista auto = foldl (flip pasarPorTramo) auto pista
 
 
 -----PUNTO 7
 type Carrera = [Pista]
 crearCarrera :: Pista -> Int -> Carrera
-crearCarrera unaPista numeroDeVueltas = replicate numeroDeVueltas $ unaPista
+crearCarrera unaPista numeroDeVueltas = replicate numeroDeVueltas unaPista
 
 tourBuenosAires :: Carrera
 tourBuenosAires = crearCarrera superPista 20
@@ -122,15 +118,11 @@ Hacer que una lista de autos juegue una carrera, teniendo los resultados
 parciales de cada vuelta, y la eliminación de los autos que no dan más en cada vuelta.
 -}
 
--- no funciona pero es aestetic
 jugarCarrera :: [Auto] -> Carrera -> [[Auto]]
-jugarCarrera autos = map (flip peganLaVuelta autos)
+jugarCarrera autos = foldl darVueltas [autos]
 
-jugarCarrera' :: [Auto] -> Carrera -> [[String]]
-jugarCarrera' autos [] = nombresDe autos
-jugarCarrera' autos (pista : pistas) = 
-    nombresDe (peganLaVuelta pista autos) 
-    ++ jugarCarrera' (filter (not . noDaMas) (peganLaVuelta pista autos)) pistas
+darVueltas :: [[Auto]] -> Pista -> [[Auto]]
+darVueltas autosXVuelta pista =
+    autosXVuelta ++ [filter (not . noDaMas). peganLaVuelta pista . last $ autosXVuelta]
 
-nombresDe :: [Auto] -> [[String]]
-nombresDe autos = [map marca autos]
+
