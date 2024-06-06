@@ -115,22 +115,22 @@ crearCarrera unaPista numeroDeVueltas = replicate numeroDeVueltas $ unaPista
 
 tourBuenosAires :: Carrera
 tourBuenosAires = crearCarrera superPista 20
+
+
 {-
 Hacer que una lista de autos juegue una carrera, teniendo los resultados 
 parciales de cada vuelta, y la eliminación de los autos que no dan más en cada vuelta.
 -}
 
+-- no funciona pero es aestetic
 jugarCarrera :: [Auto] -> Carrera -> [[Auto]]
 jugarCarrera autos = map (flip peganLaVuelta autos)
 
 jugarCarrera' :: [Auto] -> Carrera -> [[String]]
-jugarCarrera' autos = map (funcionLoca autos)
+jugarCarrera' autos [] = nombresDe autos
+jugarCarrera' autos (pista : pistas) = 
+    nombresDe (peganLaVuelta pista autos) 
+    ++ jugarCarrera' (filter (not . noDaMas) (peganLaVuelta pista autos)) pistas
 
-funcionLoca :: [Auto] -> Pista -> [String]
-funcionLoca
-
-
-
-
-
-
+nombresDe :: [Auto] -> [[String]]
+nombresDe autos = [map marca autos]
