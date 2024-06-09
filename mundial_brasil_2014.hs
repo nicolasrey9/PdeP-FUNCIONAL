@@ -123,7 +123,7 @@ menorCansancio :: Jugador -> Jugador -> Bool
 menorCansancio menosCansado masCansado = cansancio menosCansado < cansancio masCansado
 
 plantelMenosCansado :: Equipo -> [Jugador]
-plantelMenosCansado = take 11 . quickSort menorCansancio.jugadoresEquipo
+plantelMenosCansado = take 11 . quickSort menorCansancio . jugadoresEquipo
 
 sumarPromediosGol :: [Jugador] -> Float
 sumarPromediosGol = sum . map promedioGol
@@ -141,13 +141,9 @@ campeonDeTorneo'' :: [Equipo] -> Equipo
 campeonDeTorneo'' [equipo] = equipo
 campeonDeTorneo'' (equipo1 : equipo2 : equipos) = campeonDeTorneo'' (ganaPartido equipo1 equipo2: equipos)
 
-Los días pasaron, las vuvuzelas se escucharon, una nueva Larissa Riquelme se hizo conocida, 
-y el pulpo Paul volvió a acertar en los resultados. Después de un gran mundial se quiere saber 
-quién va a ser elegido como el mejor de todos para entregarle el premio y ser reconocido en todo 
-el mundo como “EL GROSO”. Para ello se ingresa una lista de equipos, y del equipo elegido ganador 
-(el campeón), se quiere saber el nombre del primer jugador que cumpla la condición de ser figura 
-(en todo equipo hay 1 por lo menos).
-
 --------------
 -- Punto 07 --
 --------------
+balonDeOro :: [Equipo] -> String
+balonDeOro =  nombre. head . filter esFigura . jugadoresEquipo . campeonDeTorneo
+
