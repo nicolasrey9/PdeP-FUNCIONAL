@@ -36,10 +36,7 @@ personajeConMenosDe45 :: Personaje -> Bool
 personajeConMenosDe45 = (<45) . edad
 
 energiaTotalDeUniverso :: Universo -> Int
-energiaTotalDeUniverso = sum . map energiaDePersonajes . filter tieneMasDeUnaHabilidad
-
-energiaDePersonajes :: Personaje -> Int
-energiaDePersonajes = energia
+energiaTotalDeUniverso = sum . map energia . filter tieneMasDeUnaHabilidad
 
 tieneMasDeUnaHabilidad :: Personaje -> Bool
 tieneMasDeUnaHabilidad = (>1) . length . habilidades
@@ -106,7 +103,7 @@ utilizar gemas enemigo = foldl (flip($)) enemigo gemas
 -------PUNTO 6---------
 -----------------------
 gemaMasPoderosa :: Guantelete -> Personaje -> Gema
-gemaMasPoderosa (Guantelete _ [x]) _ = x
+gemaMasPoderosa (Guantelete _ [unaSolaGema]) _ = unaSolaGema
 gemaMasPoderosa (Guantelete _ unasGemas) unPJ = gemaQueBajaMasLaEnergia unasGemas unPJ
 
 gemaQueBajaMasLaEnergia :: [Gema] -> Personaje -> Gema

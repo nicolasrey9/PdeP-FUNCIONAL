@@ -103,6 +103,11 @@ peganLaVuelta unaPista = map (corraMientrasSeLaBanque unaPista)
 corraMientrasSeLaBanque :: Pista -> Auto -> Auto
 corraMientrasSeLaBanque pista auto = foldl (flip pasarPorTramo) auto pista
 
+peganLaVuelta' :: Pista -> [Auto] -> [Auto]
+peganLaVuelta' unaPista unosAutos = foldl correrPorPista unosAutos unaPista
+    where
+        correrPorPista :: [Auto] -> Tramo -> [Auto]
+        correrPorPista autos unTramo = map (pasarPorTramo unTramo) autos
 
 -----PUNTO 7
 type Carrera = [Pista]
