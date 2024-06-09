@@ -10,7 +10,7 @@ data Persona = Persona{
     experiencia :: Int
 }
 siempreDetras :: Criatura
-siempreDetras = Criatura 0 (\_ ->True)
+siempreDetras = Criatura 0 (const False)
 
 gnomos :: Int -> Criatura
 gnomos gnomosAgrupados = Criatura (2^gnomosAgrupados) (poseeItem "soplador de hojas")
