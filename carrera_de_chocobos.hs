@@ -136,10 +136,6 @@ dosParejos unaPista (unBul, valor) unJinete =
         taimJinete = tiempoTotal (snd unJinete) unaPista
 
 
---------------
--- Punto 08 --
---------------
-
 
 
 
